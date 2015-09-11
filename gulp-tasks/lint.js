@@ -10,8 +10,17 @@ var gulp = require('gulp'),
 gulp.task('lint', ['lint-src', 'lint-gulp']);
 
 gulp.task('lint-src', function() {
+  var files;
+  console.log(argv.files);
+  if (argv.files) {
+    console.log('files');
+    files = parseFiles(argv.files);
+  } else {
+    files = config.selectors.srcScripts;
+  }
+
   return gulp
-    .src(config.selectors.srcScripts)
+    .src(files)
     .pipe(jshint(config.lint.options.src))
     .pipe(jshint.reporter(stylish))
     .pipe(jshint.reporter('fail'))
@@ -38,3 +47,7 @@ gulp.task('lint-gulp', function() {
       }
     });
 });
+
+function parseFiles(str) {
+  return (str || '').split(',');
+}
