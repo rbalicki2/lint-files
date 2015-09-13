@@ -29,8 +29,10 @@ For now, `-m` and other flags you would expect `git commit` to have aren't imple
 
 ## How it should work
 
-It looks in your `git log` for the phrase `passed-lint`. If found, it runs `git config lint.specificFiles`
-ONLY on the files that have changed since that commit. If not found, it runs `git config lint.allFiles`.
+* It looks in your `git log` for the phrase `passed-lint`.
+* If found, it runs `git config lint.specificFiles`
+* ONLY on the files that have changed since that commit.
+* If not found, it runs `git config lint.allFiles`.
 
 If lint passes, it will make a commit and append `passed-lint` to your commit message.
 
