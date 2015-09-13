@@ -7,18 +7,20 @@ var gulp = require('gulp'),
     config = require('./config.json'),
     argv = require('./argv.js'),
     glob = require('glob'),
+    gitShow = require('gulp-git-show'),
+    gulpif = require('gulp-if'),
     _ = require('lodash');
 
 gulp.task('lint', ['lint-src', 'lint-gulp']);
 
 gulp.task('lint-src', function() {
-  var paramFiles,
+  var paramFiles = parseFiles(argv.files),
       allFiles,
-      filesToLint;
+      filesToLint,
+      pipe;
 
-  if (argv.files) {
+  if (argv.files && paramFiles.length) {
     allFiles = globArray(config.selectors.srcScripts);
-    paramFiles = parseFiles(argv.files);
     filesToLint = _.intersection(allFiles,paramFiles);
   } else {
     filesToLint = config.selectors.srcScripts;
@@ -26,6 +28,9 @@ gulp.task('lint-src', function() {
 
   return gulp
     .src(filesToLint)
+    .pipe(gulpif(!!argv.staged, gitShow({
+      staged: true
+    })))
     .pipe(jshint(config.lint.options.src))
     .pipe(jshint.reporter(stylish))
     .pipe(jshint.reporter('fail'))
@@ -39,20 +44,22 @@ gulp.task('lint-src', function() {
 });
 
 gulp.task('lint-gulp', function() {
-  var paramFiles,
+  var paramFiles = parseFiles(argv.files),
       allFiles,
       filesToLint;
 
-  if (argv.files) {
+  if (argv.files && paramFiles.length) {
     allFiles = globArray(config.selectors.gulpScripts);
-    paramFiles = parseFiles(argv.files);
     filesToLint = _.intersection(allFiles,paramFiles);
   } else {
-    filesToLint = config.selectors.srcScripts;
+    filesToLint = config.selectors.gulpScripts;
   }
 
   return gulp
     .src(filesToLint)
+    .pipe(gulpif(!!argv.staged, gitShow({
+      staged: true
+    })))
     .pipe(jshint(config.lint.options.gulp))
     .pipe(jshint.reporter(stylish))
     .pipe(jshint.reporter('fail'))

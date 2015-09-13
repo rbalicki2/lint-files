@@ -1,24 +1,11 @@
 {
-  "name": "angular-library-boilerplate",
+  "name": "lint-files",
   "version": "0.0.0",
-  "description": "A badass boilerplate for an angular library",
-  "keywords": [
-    "angular",
-    "boilerplate",
-    "library",
-    "gulp"
-  ],
-  "homepage": "https://github.com/rbalicki2/angular-library-boilerplate/",
-  "bugs": "https://github.com/rbalicki2/angular-library-boilerplate/issues",
+  "description": "?",
   "license": "MIT",
   "author": {
     "name": "Robert Balicki",
     "email": "robert.balicki@gmail.com"
-  },
-  "main": "./promise-unwrap.min.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/rbalicki2/angular-library-boilerplate.git"
   },
   "scripts": {
     "lint": "gulp lint",
@@ -29,6 +16,8 @@
   "devDependencies": {
     "gulp": "^3.9.0",
     "gulp-concat": "^2.6.0",
+    "gulp-git-show": "git://github.com/rbalicki2/gulp-git-show#master",
+    "gulp-if": "^1.2.5",
     "gulp-iife": "^0.1.0",
     "gulp-indent": "^1.0.1",
     "gulp-jshint": "^1.11.2",
