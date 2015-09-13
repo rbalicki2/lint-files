@@ -1,7 +1,7 @@
 {
   "name": "lint-files",
   "version": "0.0.0",
-  "description": "?",
+  "description": "A POC for gulp-git-show and git-commit-and-lint",
   "license": "MIT",
   "author": {
     "name": "Robert Balicki",

@@ -1,5 +1,9 @@
 'use strict';
 
+// BUG: If there's a file in the staging area that was deleted
+// in the working directory, it won't be src'ed and won't be linted.
+// TODO: fix that in gulp-git-show?
+
 var gulp = require('gulp'),
     jshint = require('gulp-jshint'),
     stylish = require('jshint-stylish'),

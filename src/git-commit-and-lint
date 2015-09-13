@@ -1,0 +1,86 @@
+# to install, move to /usr/bin and chmod +x it
+
+# TODO
+# better command line arguments (-f is too strong)
+# -h for help
+# etc
+
+# command line arguments
+# see http://stackoverflow.com/a/5302550/2338813
+options='f'
+while getopts $options option
+do
+  case $option in
+    f  )  force=1;;
+    \? )  if (( (err & ERROPTS) != ERROPTS ))
+          then
+            error $NOEXIT $ERROPTS "Unknown option."
+          fi;;
+    *  )  error $NOEXIT $ERROARG "Missing option argument.";;
+  esac
+done
+
+shift $(($OPTIND - 1))
+
+################
+
+# BUG: if there is nothing changed but there are things in the staging area
+# e.g. they are reverting to an old state.
+# TODO: don't do git commit allow-empty -m "passed-lint", instead do
+# git commit if there are anyFilesToChange (see below)
+
+lastSuccessfulCommit=$(git log --grep passed-lint --oneline | head -n 1 | awk '{print $1}');
+if [ -n "$lastSuccessfulCommit" ]; then
+  filesToLint=$(echo $lastSuccessfulCommit | xargs git diff --name-only --cached | tr '\n' ',')
+
+  if [ -n "$filesToLint" ]; then
+    echo $lastSuccessfulCommit | xargs git diff --name-only --cached | tr '\n' ',' | xargs -I {} echo `git config lint.specificFiles` {} | sh
+  else
+    if [ -n "$force" ]; then
+      echo "git commit-and-lint: no file changes detected, but -f is enabled; making empty commit message"
+      git commit --allow-empty -m "passed-lint"
+    else
+      echo "git commit-and-lint: no files to lint; include option --f to make an empty commit"
+    fi
+    exit 0
+  fi
+else
+  `git config lint.allFiles`
+fi
+
+# this is either the return value of the line starting with echo $lastSuccessfulCommit
+# or the line `git config line.allFilesCommand`
+# (this is the return value of a lint command)
+ec=$?;
+
+if [ "$ec" -ne 0 ]; then
+  # lint error
+  echo "git commit-and-lint: lint error, exiting"
+  exit "$ec"
+else
+  # no lint error
+
+  anyFilesToChange=$(git diff --name-only --cached)
+
+  if [ -n "$anyFilesToChange" ]; then
+    # there are files to change, this is a non-empty commit
+    git commit
+  else
+    if [ -n "$force" ]; then
+      echo "git commit-and-lint: no files to be commited, but -f is enabled; making declarative commit"
+      git commit -m "passed-lint" --allow-empty
+    else
+      echo "git commit-and-lint: no files to be commited, use parameter -f to force declarative commit"
+    fi
+    exit 0
+  fi
+
+  ec=$?
+  if [ $ec != 0 ]; then
+    echo "git commit-and-lint: aborting due to empty commit message"
+    # TODO support allow-empty
+  else
+    echo "git commit-and-lint: adding passed-lint message"
+    git log --format=%B -n 1 head | xargs -I {} printf "git commit --amend --allow-empty -m '{}\npassed-lint'" | sh
+  fi
+fi
