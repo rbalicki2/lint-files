@@ -40,11 +40,14 @@
     "karma": "^0.13.9",
     "karma-jasmine": "^0.3.6",
     "karma-phantomjs-launcher": "^0.2.1",
+    "lodash": "^3.10.1",
     "main-bower-files": "^2.9.0",
     "phantomjs": "^1.9.18",
     "require-dir": "^0.3.0",
     "run-sequence": "^1.1.2",
     "yargs": "^3.24.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "glob": "^5.0.14"
+  }
 }

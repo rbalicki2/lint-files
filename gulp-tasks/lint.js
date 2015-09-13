@@ -5,22 +5,27 @@ var gulp = require('gulp'),
     stylish = require('jshint-stylish'),
     notify = require('gulp-notify'),
     config = require('./config.json'),
-    argv = require('./argv.js');
+    argv = require('./argv.js'),
+    glob = require('glob'),
+    _ = require('lodash');
 
 gulp.task('lint', ['lint-src', 'lint-gulp']);
 
 gulp.task('lint-src', function() {
-  var files;
-  console.log(argv.files);
+  var paramFiles,
+      allFiles,
+      filesToLint;
+
   if (argv.files) {
-    console.log('files');
-    files = parseFiles(argv.files);
+    allFiles = globArray(config.selectors.srcScripts);
+    paramFiles = parseFiles(argv.files);
+    filesToLint = _.intersection(allFiles,paramFiles);
   } else {
-    files = config.selectors.srcScripts;
+    filesToLint = config.selectors.srcScripts;
   }
 
   return gulp
-    .src(files)
+    .src(filesToLint)
     .pipe(jshint(config.lint.options.src))
     .pipe(jshint.reporter(stylish))
     .pipe(jshint.reporter('fail'))
@@ -34,8 +39,20 @@ gulp.task('lint-src', function() {
 });
 
 gulp.task('lint-gulp', function() {
+  var paramFiles,
+      allFiles,
+      filesToLint;
+
+  if (argv.files) {
+    allFiles = globArray(config.selectors.gulpScripts);
+    paramFiles = parseFiles(argv.files);
+    filesToLint = _.intersection(allFiles,paramFiles);
+  } else {
+    filesToLint = config.selectors.srcScripts;
+  }
+
   return gulp
-    .src(config.selectors.gulpScripts)
+    .src(filesToLint)
     .pipe(jshint(config.lint.options.gulp))
     .pipe(jshint.reporter(stylish))
     .pipe(jshint.reporter('fail'))
@@ -48,6 +65,18 @@ gulp.task('lint-gulp', function() {
     });
 });
 
-function parseFiles(str) {
-  return (str || '').split(',');
+function parseFiles (str) {
+  return _.filter((str || '').split(','), function(filename) {
+    return filename.length;
+  });
+}
+
+function globArray (arrayOfGlobs) {
+  var files = [];
+  arrayOfGlobs.forEach(function(globString) {
+    files = files.concat(glob.sync(globString));
+  });
+  files = _.uniq(files);
+
+  return files;
 }
